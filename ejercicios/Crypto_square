@@ -1,0 +1,110 @@
+#include <iostream>
+#include <string>
+#include <cmath>
+#include <vector>
+#include <algorithm>
+#include <cctype>
+using namespace std;
+
+// Exercism: crypto-square
+// Implement the classic crypto-square cipher for encoding/decoding text.
+// Steps:
+//   1. Normalize: lowercase + remove non-alphanumeric
+//   2. Arrange into a rectangle (c columns, r rows, c >= r, c - r <= 1)
+//   3. Read off columns to produce ciphertext chunks
+
+class CryptoSquare {
+public:
+    static string normalize(const string& text) {
+        string result;
+        for (char c : text) {
+            if (isalnum(c)) result += tolower(c);
+        }
+        return result;
+    }
+
+    static pair<int,int> dimensions(int len) {
+        if (len == 0) return {0, 0};
+        int c = (int)ceil(sqrt((double)len));
+        int r = (int)ceil((double)len / c);
+        return {r, c};
+    }
+
+    static string encode(const string& plaintext) {
+        string norm = normalize(plaintext);
+        if (norm.empty()) return "";
+
+        auto [r, c] = dimensions(norm.size());
+
+        // Pad with spaces to fill the rectangle
+        while ((int)norm.size() < r * c) norm += ' ';
+
+        // Read columns
+        vector<string> chunks;
+        for (int col = 0; col < c; col++) {
+            string chunk;
+            for (int row = 0; row < r; row++) {
+                chunk += norm[row * c + col];
+            }
+            chunks.push_back(chunk);
+        }
+
+        // Join with spaces
+        string result;
+        for (int i = 0; i < (int)chunks.size(); i++) {
+            if (i > 0) result += ' ';
+            result += chunks[i];
+        }
+        return result;
+    }
+};
+
+int main() {
+    cout << "=== Exercism: crypto-square ===" << endl << endl;
+
+    // Test cases from Exercism
+    struct TestCase {
+        string input;
+        string expected;
+    };
+
+    vector<TestCase> tests = {
+        {"", ""},
+        {"s", "s"},
+        {"If man was meant to stay on the ground, god would have given us roots",
+         "imtgdvs fearwer mayoogo anouuio ntnnlvt wttddes aohghn  sseoau"},
+        {"Have a nice day", "hae and via ecy"},
+        {"feed the dog", "fto ehg ee  dd"},
+        {"chill out", "clu hlt io"},
+        {"1 2 3 4 5", "14 25 3"}
+    };
+
+    bool allPassed = true;
+    for (auto& t : tests) {
+        string result = CryptoSquare::encode(t.input);
+        // Trim trailing spaces for comparison
+        string trimmed = result;
+        while (!trimmed.empty() && trimmed.back() == ' ') trimmed.pop_back();
+        string expTrimmed = t.expected;
+        while (!expTrimmed.empty() && expTrimmed.back() == ' ') expTrimmed.pop_back();
+
+        bool passed = (trimmed == expTrimmed);
+        allPassed = allPassed && passed;
+
+        cout << "Input:    \"" << t.input << "\"" << endl;
+        cout << "Output:   \"" << trimmed << "\"" << endl;
+        cout << "Expected: \"" << expTrimmed << "\"" << endl;
+        cout << "Result:   " << (passed ? "PASS" : "FAIL") << endl << endl;
+    }
+
+    cout << (allPassed ? "All tests passed!" : "Some tests failed.") << endl;
+
+    // Demonstrate dimensions
+    cout << endl << "Rectangle dimensions for various text lengths:" << endl;
+    for (int n : {1, 4, 9, 10, 15, 25, 26}) {
+        auto [r, c] = CryptoSquare::dimensions(n);
+        cout << "  len=" << n << " -> " << r << "x" << c << endl;
+    }
+
+    return 0;
+}
