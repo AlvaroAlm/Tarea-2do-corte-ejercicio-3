@@ -1,0 +1,99 @@
+#include <iostream>
+#include <set>
+#include <vector>
+using namespace std;
+
+// LeetCode 3709: Exam Score Tracker
+// Maintain a sorted multiset of exam scores and answer queries
+// about the k-th highest score and count of scores above a threshold.
+
+class ExamScoreTracker {
+private:
+    multiset<int, greater<int>> scores; // descending order
+
+public:
+    ExamScoreTracker() {}
+
+    // Add a new exam score
+    void addScore(int score) {
+        scores.insert(score);
+    }
+
+    // Remove an existing score (one occurrence)
+    void removeScore(int score) {
+        auto it = scores.find(score);
+        if (it != scores.end()) {
+            scores.erase(it);
+        }
+    }
+
+    // Return the k-th highest score (1-indexed)
+    int getKthHighest(int k) {
+        if (k > (int)scores.size()) return -1;
+        auto it = scores.begin();
+        advance(it, k - 1);
+        return *it;
+    }
+
+    // Count how many scores are strictly greater than threshold
+    int countAbove(int threshold) {
+        return (int)scores.size() - (int)distance(scores.begin(),
+               scores.upper_bound(threshold));
+    }
+
+    // Return all scores in descending order
+    vector<int> getAllScores() {
+        return vector<int>(scores.begin(), scores.end());
+    }
+};
+
+int main() {
+    cout << "=== LeetCode 3709: Exam Score Tracker ===" << endl << endl;
+
+    ExamScoreTracker tracker;
+
+    // Add scores
+    vector<int> initialScores = {85, 92, 78, 95, 88, 72, 91, 85};
+    cout << "Adding scores: ";
+    for (int s : initialScores) {
+        tracker.addScore(s);
+        cout << s << " ";
+    }
+    cout << endl;
+
+    vector<int> all = tracker.getAllScores();
+    cout << "Scores (descending): ";
+    for (int s : all) cout << s << " ";
+    cout << endl << endl;
+
+    // k-th highest queries
+    cout << "1st highest score: " << tracker.getKthHighest(1) << " (expected: 95)" << endl;
+    cout << "2nd highest score: " << tracker.getKthHighest(2) << " (expected: 92)" << endl;
+    cout << "3rd highest score: " << tracker.getKthHighest(3) << " (expected: 91)" << endl;
+    cout << "5th highest score: " << tracker.getKthHighest(5) << " (expected: 85)" << endl;
+    cout << endl;
+
+    // Count above threshold
+    cout << "Scores above 85: " << tracker.countAbove(85) << " (expected: 4)" << endl;
+    cout << "Scores above 90: " << tracker.countAbove(90) << " (expected: 3)" << endl;
+    cout << endl;
+
+    // Remove a score and re-query
+    tracker.removeScore(95);
+    cout << "After removing 95:" << endl;
+    cout << "1st highest score: " << tracker.getKthHighest(1) << " (expected: 92)" << endl;
+    cout << "Scores above 85: " << tracker.countAbove(85) << " (expected: 3)" << endl;
+
+    // Add more scores
+    tracker.addScore(99);
+    tracker.addScore(60);
+    cout << endl << "After adding 99 and 60:" << endl;
+    all = tracker.getAllScores();
+    cout << "All scores: ";
+    for (int s : all) cout << s << " ";
+    cout << endl;
+    cout << "1st highest: " << tracker.getKthHighest(1) << " (expected: 99)" << endl;
+    cout << "Total count: " << tracker.getAllScores().size() << endl;
+
+    return 0;
+}
