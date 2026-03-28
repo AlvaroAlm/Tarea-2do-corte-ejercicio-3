@@ -1,0 +1,68 @@
+#include <iostream>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+class AuthenticationManager {
+private:
+    int timeToLive;
+    unordered_map<string, int> tokens; // tokenId -> expiry time
+
+public:
+    AuthenticationManager(int timeToLive) {
+        this->timeToLive = timeToLive;
+    }
+
+    void generate(string tokenId, int currentTime) {
+        tokens[tokenId] = currentTime + timeToLive;
+    }
+
+    void renew(string tokenId, int currentTime) {
+        auto it = tokens.find(tokenId);
+        if (it != tokens.end() && it->second > currentTime) {
+            it->second = currentTime + timeToLive;
+        }
+    }
+
+    int countUnexpiredTokens(int currentTime) {
+        int count = 0;
+        for (auto& [id, expiry] : tokens) {
+            if (expiry > currentTime) count++;
+        }
+        return count;
+    }
+};
+
+int main() {
+    cout << "=== LeetCode 1797: Design Authentication Manager ===" << endl;
+    cout << endl;
+
+    AuthenticationManager authManager(5);
+
+    authManager.renew("aaa", 1);
+    cout << "renew(\"aaa\", 1) -> No token exists, nothing happens." << endl;
+
+    authManager.generate("aaa", 2);
+    cout << "generate(\"aaa\", 2) -> Token \"aaa\" created, expires at t=7." << endl;
+
+    int count1 = authManager.countUnexpiredTokens(6);
+    cout << "countUnexpiredTokens(6) -> " << count1 << " (expected: 1)" << endl;
+
+    authManager.generate("bbb", 7);
+    cout << "generate(\"bbb\", 7) -> Token \"bbb\" created, expires at t=12." << endl;
+
+    authManager.renew("aaa", 8);
+    cout << "renew(\"aaa\", 8) -> Token \"aaa\" expired at t=7, ignored." << endl;
+
+    authManager.renew("bbb", 10);
+    cout << "renew(\"bbb\", 10) -> Token \"bbb\" renewed, expires at t=15." << endl;
+
+    int count2 = authManager.countUnexpiredTokens(15);
+    cout << "countUnexpiredTokens(15) -> " << count2 << " (expected: 0)" << endl;
+
+    cout << endl;
+    cout << "Output: [null, null, null, " << count1
+         << ", null, null, null, " << count2 << "]" << endl;
+
+    return 0;
+}
