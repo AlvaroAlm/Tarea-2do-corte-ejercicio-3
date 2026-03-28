@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.10)
+project(ProgrammingAssignment)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# LeetCode 1797 - Design Authentication Manager
+add_executable(authentication_manager
+    leetcode/authentication_manager.cpp
+)
+
+# LeetCode 3709 - Exam Score Tracker
+add_executable(exam_score_tracker
+    leetcode/exam_score_tracker.cpp
+)
+
+# Exercism - crypto-square
+add_executable(crypto_square
+    exercism/crypto_square.cpp
+)
+
+# Exercism - bank-account
+add_executable(bank_account
+    exercism/bank_account.cpp
+)
+
+# Build all target
+add_custom_target(all_solutions
+    DEPENDS
+        authentication_manager
+        exam_score_tracker
+        crypto_square
+        bank_account
+)
+
+message(STATUS "Build all with: cmake .. && make")
+message(STATUS "Run individual: ./authentication_manager, ./exam_score_tracker, ./crypto_square, ./bank_account")
